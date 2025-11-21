@@ -1,0 +1,68 @@
+﻿--1. Conteggio dei verbali trascritti
+SELECT COUNT(*) AS TtlVerbali FROM VERBALE;
+
+--2. Conteggio dei verbali trascritti raggruppati per anagrafe
+SELECT A.idAnagrafica, A.Cognome + ' ' + A.Nome AS Multato, COUNT(V.idVerbale) AS TtlVerb FROM ANAGRAFICA A
+JOIN VERBALE V ON V.idAnagrafica = A.idAnagrafica
+GROUP BY A.idAnagrafica, A.Cognome, A.Nome
+ORDER BY TtlVerb DESC;
+
+--3. Conteggio dei verbali trascritti raggruppati per tipo di violazione
+SELECT T.idViolazione, T.Descrizione, COUNT(V.idVerbale) AS TtlVerb FROM TIPO_VIOLAZIONE T
+LEFT JOIN VERBALE V ON V.idViolazione = T.idViolazione
+GROUP BY T.idViolazione, T.Descrizione
+ORDER BY TtlVerb DESC;
+
+--4. Totale dei punti decurtati per ogni anagrafe
+SELECT A.idAnagrafica, A.Cognome + ' ' + A.Nome AS Multato, SUM(V.Decurtamento_Punti) AS TtlPunti FROM ANAGRAFICA A
+LEFT JOIN VERBALE V ON V.idAnagrafica = A.idAnagrafica
+GROUP BY A.idAnagrafica, A.Cognome, A.Nome
+ORDER BY TtlPunti DESC;
+
+--5. Cognome, Nome, Data violazione, Indirizzo violazione, importo e punti decurtati per tutti gli anagrafici residenti a Palermo
+INSERT INTO ANAGRAFICA (Cognome, Nome, Indirizzo, Citta, CAP, CF) VALUES
+('Rizzo', 'Claudio', 'Via Libertà 44', 'Palermo', '90100', 'RZZCLD85A01G273X'),
+('Sala', 'Martina', 'Via Maqueda 120', 'Palermo', '90100', 'SLAMTN90B41G273X');
+INSERT INTO VERBALE (idAnagrafica, idViolazione, idAgente, Data_Violazione, Indirizzo_Violazione, Data_Trascrizione, Importo, Decurtamento_Punti) VALUES
+(11, 4, 3, '2025-11-01 09:30:00', 'Via Roma 12, Milano', '2025-11-02 10:00:00', 545.76, 6),
+(12, 5, 2, '2025-11-03 14:20:00', 'Corso Torino 45, Torino', '2025-11-04 11:15:00', 37.23, 3);
+SELECT A.Cognome + ' ' + A.Nome AS Multato, V.Data_Violazione, V.Indirizzo_Violazione, V.Importo, V.Decurtamento_Punti
+FROM ANAGRAFICA A
+JOIN VERBALE V ON V.idAnagrafica = A.idAnagrafica
+WHERE A.Citta = 'Palermo'
+ORDER BY V.Importo DESC;
+
+--6. Cognome, Nome, Indirizzo, Data violazione, importo e punti decurtati per le violazioni fatte tra il febbraio 2009 e luglio 2009
+SELECT * FROM VERBALE;
+SELECT A.Cognome + ' ' + A.Nome AS Multato, A.Indirizzo, V.Data_Violazione, V.Importo, V.Decurtamento_Punti FROM ANAGRAFICA A
+JOIN VERBALE V ON V.idAnagrafica = A.idAnagrafica
+WHERE V.Data_Violazione BETWEEN '2025-02-01T00:00:00' AND '2025-07-31T23:59:59'
+
+--7. Totale degli importi per ogni anagrafico
+SELECT A.Cognome + ' ' + A.Nome AS Multato, SUM(V.Importo) AS TtlImporto FROM ANAGRAFICA A
+LEFT JOIN VERBALE V ON V.idAnagrafica = A.idAnagrafica
+GROUP BY A.Cognome, A.Nome
+
+--8. Visualizzazione di tutti gli anagrafici residenti a Palermo
+SELECT * FROM ANAGRAFICA WHERE Citta = 'Palermo'
+
+--9. Query che visualizzi Data violazione, Importo e decurtamento punti relativi ad una certa data
+SELECT Data_Violazione, Importo, Decurtamento_Punti FROM VERBALE WHERE Data_Violazione BETWEEN '2025-03-10T23:59:59' AND '2025-03-12T00:00:00';
+
+--10. Conteggio delle violazioni contestate raggruppate per Nominativo dell’agente di Polizia
+SELECT A.idAgente, A.Cognome + ' ' + A.Nome AS COGNOME_NOME, COUNT(V.idAgente) AS TtlIncarichi FROM AGENTE A
+LEFT JOIN VERBALE V ON V.idAgente = A.idAgente
+GROUP BY A.idAgente, A.Cognome, A.Nome
+ORDER BY TtlIncarichi DESC
+
+--11. Cognome, Nome, Indirizzo, Data violazione, Importo e punti decurtati per tutte le violazioni che superino il decurtamento di 5 punti
+SELECT a.Cognome, a.Nome, a.Indirizzo, v.Data_Violazione, v.Importo, v.Decurtamento_Punti FROM ANAGRAFICA a
+JOIN VERBALE v ON v.idAnagrafica = a.idAnagrafica
+WHERE v.Decurtamento_Punti > 5
+ORDER BY v.Decurtamento_Punti DESC
+
+--12. Cognome, Nome, Indirizzo, Data violazione, Importo e punti decurtati per tutte le violazioni che superino l’importo di 400 euro
+SELECT a.Cognome, a.Nome, a.Indirizzo, v.Data_Violazione, v.Importo, v.Decurtamento_Punti FROM ANAGRAFICA a
+JOIN VERBALE v ON v.idAnagrafica = a.idAnagrafica
+WHERE v.Importo > 400
+ORDER BY v.Importo DESC
